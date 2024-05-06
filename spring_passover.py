@@ -38,12 +38,34 @@ def nissans_history(init_year: int, years_back: int) -> list:
     ]
 
 
+def fraction_of_bad_years(years_list: list) -> float:
+    return sum([nissans_shift(y) > 15 for y in years_list]) / len(years_list)
+
+
+def hisfory_of_bad_years(
+    init_year: int, years_back: int, intervals: int
+) -> list:
+    return [
+        (c, fraction_of_bad_years(list(range(c, c + intervals))))
+        for c in range(init_year - years_back, init_year + 1, intervals)
+    ]
+
+
 def main():
-    nissans_shits = nissans_history(2024, 300)
-    plt.scatter(*zip(*nissans_shits))
-    plt.axhline(y=15, color="red", linestyle="--")
-    # plt.axhline(y=-15, color="red", linestyle="--")
-    plt.title("Days between the equinox and Alef Nissan")
+    # nissans_shits = nissans_history(2500, 800)
+    #
+    # plt.scatter(*zip(*nissans_shits))
+    # plt.axhline(y=15, color="red", linestyle="--")
+    # # plt.axhline(y=-15, color="red", linestyle="--")
+    # plt.title("Days between the equinox and Alef Nissan")
+    # plt.show()
+
+    interval = 100
+    bad_years_fracs = hisfory_of_bad_years(2500, 800, interval)
+    plt.plot(*zip(*bad_years_fracs))
+    plt.title(
+        f"Fraction of years in which Passover wasn't in the spring month\nof every {interval} years invterval"
+    )
     plt.show()
 
 
