@@ -4,43 +4,51 @@ from ephem import next_spring_equinox
 import matplotlib.pyplot as plt
 
 
-def hebrew_equinox(year: str) -> tuple:
+def hebrew_equinox(year: str) -> float:
+    """
+    Calculates the Julian Day of the next spring equinox in a given Hebrew year.
+    """
     gregorian_equinox = next_spring_equinox(year).datetime()
-    hebrew_equinox = hebrew.from_gregorian(
+    hebrew_date = hebrew.from_gregorian(
         gregorian_equinox.year, gregorian_equinox.month, gregorian_equinox.day
     )
+    return julianday.from_gregorian(*hebrew.to_gregorian(*hebrew_date))
 
-    return hebrew_equinox
+
+def distance_from_years_end2(year: int) -> int:
+    gregorian_equinox = next_spring_equinox(str(year))
+    dt_equinox = datetime.datetime(*gregorian_equinox.tuple()[:5])
+    jd_equinox = julianday.from_datetime(dt_equinox)
+    hebrew_year_jd = hebrew.from_jd(jd_equinox)[0]
+    alef_nissan_julian_day = hebrew.to_jd(hebrew_year_jd, 1, 1)
+
+    distance = alef_nissan_julian_day - jd_equinox
+    return distance
 
 
 def distance_from_years_end(date: tuple) -> int:
-    """
-    Calculates the distance from the end of the hebrew year to the given hebrew date.
-    The input is given as (year, month, day).
-    """
-    gregorian_date = datetime.date(*hebrew.to_gregorian(*date))
-    alef_nissan_gregorianed = datetime.date(
-        *hebrew.to_gregorian(date[0], 1, 1)
-    )
+    hebrew_julian_day = julianday.from_gregorian(*hebrew.to_gregorian(*date))
+    alef_nissan_julian_day = julianday.from_gregorian(date[0], 1, 1)
 
-    distance = alef_nissan_gregorianed - gregorian_date
-
-    return distance.days
+    distance = alef_nissan_julian_day - hebrew_julian_day
+    return int(distance)
 
 
-def nissans_shift(year: int) -> int:
-    return distance_from_years_end(hebrew_equinox(str(year)))
+# def nissans_shift(year: int) -> int:
+#     return distance_from_years_end(hebrew_equinox(str(year)))
 
 
 def nissans_history(init_year: int, years_back: int) -> list:
     return [
-        (y, nissans_shift(y))
+        (y, distance_from_years_end2(y))
         for y in range(init_year - years_back, init_year + 1)
     ]
 
 
 def fraction_of_bad_years(years_list: list) -> float:
-    return sum([nissans_shift(y) > 15 for y in years_list]) / len(years_list)
+    return sum([distance_from_years_end2(y) > 15 for y in years_list]) / len(
+        years_list
+    )
 
 
 def hisfory_of_bad_years(
@@ -56,9 +64,12 @@ def main():
     nissans_shits = nissans_history(2024, 2000)
     max_year, max_gap = max(nissans_shits, key=lambda x: x[1])
     print(hebrew_equinox(str(max_year)))
-    print(nissans_shift(max_year))
-    print([hebrew_equinox(str(i)) for i in range(1565, 1585)])
-    print([hebrew.to_gregorian(i, 1, 1) for i in range(5325, 5345)])
+    print(distance_from_years_end2(max_year))
+    print(max_year)
+    print(max_gap)
+
+    # print([hebrew_equinox(str(i)) for i in range(1565, 1585)])
+    # print([julianday.from_gregorian(i, 1, 1) for i in range(5325, 5345)])
 
     # plt.scatter(*zip(*nissans_shits))
     # plt.axhline(y=15, color="red", linestyle="--")

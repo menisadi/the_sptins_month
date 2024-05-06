@@ -1,4 +1,5 @@
 import datetime
+from datetime import timedelta
 from convertdate import hebrew, julianday
 from ephem import next_spring_equinox
 import matplotlib.pyplot as plt
@@ -6,6 +7,8 @@ import matplotlib.pyplot as plt
 
 def hebrew_equinox(year: str) -> tuple:
     gregorian_equinox = next_spring_equinox(year).datetime()
+    if int(year) <= 1582:
+        gregorian_equinox = gregorian_equinox + timedelta(days=13)
     hebrew_equinox = hebrew.from_gregorian(
         gregorian_equinox.year, gregorian_equinox.month, gregorian_equinox.day
     )
@@ -54,17 +57,21 @@ def hisfory_of_bad_years(
 
 def main():
     nissans_shits = nissans_history(2024, 2000)
-    max_year, max_gap = max(nissans_shits, key=lambda x: x[1])
-    print(hebrew_equinox(str(max_year)))
-    print(nissans_shift(max_year))
-    print([hebrew_equinox(str(i)) for i in range(1565, 1585)])
-    print([hebrew.to_gregorian(i, 1, 1) for i in range(5325, 5345)])
 
-    # plt.scatter(*zip(*nissans_shits))
-    # plt.axhline(y=15, color="red", linestyle="--")
-    # # plt.axhline(y=-15, color="red", linestyle="--")
-    # plt.title("Days between the equinox and Alef Nissan")
-    # plt.show()
+    # max_year, max_gap = max(nissans_shits, key=lambda x: x[1])
+    # print(hebrew_equinox(str(max_year)))
+    # print(nissans_shift(max_year))
+    # print(max_year)
+    # print(max_gap)
+
+    # print([hebrew_equinox(str(i)) for i in range(1565, 1585)])
+    # print([hebrew.to_gregorian(i, 1, 1) for i in range(5325, 5345)])
+
+    plt.scatter(*zip(*nissans_shits))
+    plt.axhline(y=15, color="red", linestyle="--")
+    # plt.axhline(y=-15, color="red", linestyle="--")
+    plt.title("Days between the equinox and Alef Nissan")
+    plt.show()
 
     # interval = 100
     # bad_years_fracs = hisfory_of_bad_years(2500, 800, interval)
